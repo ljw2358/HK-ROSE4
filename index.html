@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HK 통합 플랫폼 - 5대 핵심 대시보드</title>
+    <style>
+        :root {
+            --bg-dark: #0b0f19;
+            --bg-card: #131c2e;
+            --bg-card-hover: #1a2640;
+            --purple-primary: #8b5cf6;
+            --purple-hover: #7c3aed;
+            --purple-glow: rgba(139, 92, 246, 0.4);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #1e293b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            height: 100vh;
+            max-height: 920px;
+            background-color: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @media (min-width: 481px) {
+            .app-container {
+                border-radius: 24px;
+            }
+        }
+
+        /* Header */
+        .app-header {
+            padding: 18px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--bg-dark);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 10;
+        }
+
+        .brand-logo {
+            font-size: 1.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #a78bfa, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg-card);
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #a78bfa;
+        }
+
+        /* Content Scroll Area */
+        .app-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            padding-bottom: 90px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.25s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 5대 메뉴 첫장 스타일 */
+        .main-menu-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-top: 10px;
+        }
+
+        .menu-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .menu-card:hover {
+            border-color: var(--purple-primary);
+            background: var(--bg-card-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px var(--purple-glow);
+        }
+
+        .menu-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .menu-icon {
+            font-size: 2rem;
+            background: rgba(139, 92, 246, 0.15);
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 14px;
+        }
+
+        .menu-text h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: var(--text-main);
+        }
+
+        .menu-text p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        .menu-arrow {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+        }
+
+        /* Balance Card (개인 자산 대시보드 내부) */
+        .balance-card {
+            background: linear-gradient(135deg, #1e1b4b, #311042);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 20px;
+            padding: 22px;
+            box-shadow: 0 10px 25px -5px var(--purple-glow);
+            margin-bottom: 20px;
+        }
+
+        .balance-title {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .balance-amount {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+        }
+
+        .pi-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(139, 92, 246, 0.2);
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-size: 0.82rem;
+            color: #d8b4fe;
+            font-weight: 600;
+        }
+
+        /* 10대 분산 연동망 엔진 그리드 */
+        .network-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .network-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 14px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .network-item:hover {
+            background: var(--purple-primary);
+            color: white;
+            border-color: var(--purple-primary);
+        }
+
+        /* AGI 삐니 채팅 UI */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 230px);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 14px;
+            padding-right: 4px;
+        }
+
+        .chat-bubble {
+            max-width: 82%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .chat-bubble.ai {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-bubble.user {
+            background: var(--purple-primary);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 12px 16px;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .chat-input:focus {
+            border-color: var(--purple-primary);
+        }
+
+        .send-btn {
+            background: var(--purple-primary);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            padding: 0 18px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* 공통 카드 및 버튼 스타일 */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: var(--purple-primary);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            padding: 14px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px var(--purple-glow);
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover {
+            background: var(--purple-hover);
+        }
+
+        .back-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 6px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-bottom: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .back-btn:hover {
+            color: var(--text-main);
+            border-color: var(--purple-primary);
+        }
+
+        /* Fixed Bottom Navigation Bar */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 75px;
+            background: rgba(11, 15, 25, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--border-color);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            color: var(--text-muted);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .nav-item.active {
+            color: var(--purple-primary);
+        }
+
+        .nav-icon {
+            font-size: 1.3rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+        <div class="brand-logo">HK GLOBAL PLATFORM</div>
+        <div class="user-badge">
+            <span>👑 혜공 회장님</span>
+        </div>
+    </header>
+
+    <!-- Content Area -->
+    <main class="app-content">
+        
+        <!-- 첫장 (Main 5대 핵심 메뉴 허브) -->
+        <div id="tab-home" class="tab-content active">
+            <div style="margin-bottom: 16px;">
+                <h2 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 4px;">HK 통합 메인 허브</h2>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">원하시는 핵심 메뉴를 선택해 주세요.</p>
+            </div>
+
+            <div class="main-menu-grid">
+                <!-- 1. 개인 자산 대시보드 -->
+                <div class="menu-card" onclick="switchTab('dashboard')">
+                    <div class="menu-info">
+                        <div class="menu-icon">📊</div>
+                        <div class="menu-text">
+                            <h3>개인 자산 대시보드</h3>
+                            <p>실시간 잔액 및 Pi 자산 통합 관리</p>
+                        </div>
+                    </div>
+                    <div class="menu-arrow">›</div>
+                </div>
+
+                <!-- 2. 사고 팔고 예금하기 -->
+                <div class="menu-card" onclick="switchTab('trading')">
+                    <div class="menu-info">
+                        <div class="menu-icon">💱</div>
+                        <div class="menu-text">
+                            <h3>사고 팔고 예금하기</h3>
+                            <p>10대 분산 연동망 및 스왑·예치 엔진</p>
+                        </div>
+                    </div>
+                    <div class="menu-arrow">›</div>
+                </div>
+
+                <!-- 3. 고객센터 삐니 -->
+                <div class="menu-card" onclick="switchTab('support')">
+                    <div class="menu-info">
+                        <div class="menu-icon">🤖</div>
+                        <div class="menu-text">
+                            <h3>고객센터 삐니</h3>
+                            <p>AGI 전담 AI 비서와 실시간 1:1 케어</p>
+                        </div>
+                    </div>
+                    <div class="menu-arrow">›</div>
+                </div>
+
+                <!-- 4. 네비게이터 -->
+                <div class="menu-card" onclick="switchTab('nav')">
+                    <div class="menu-info">
+                        <div class="menu-icon">🧭</div>
+                        <div class="menu-text">
+                            <h3>네비게이터</h3>
+                            <p>HK WorldBank · 스마트 글래스 허브</p>
+                        </div>
+                    </div>
+                    <div class="menu-arrow">›</div>
+                </div>
+
+                <!-- 5. 유튜브와 틱톡 -->
+                <div class="menu-card" onclick="switchTab('media')">
+                    <div class="menu-info">
+                        <div class="menu-icon">📺</div>
+                        <div class="menu-text">
+                            <h3>유튜브와 틱톡</h3>
+                            <p>실시간 방송 및 대외 소통 채널</p>
+                        </div>
+                    </div>
+                    <div class="menu-arrow">›</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sub Tab 1: 개인 자산 대시보드 -->
+        <div id="tab-dashboard" class="tab-content">
+            <button class="back-btn" onclick="switchTab('home')">← 메인으로 돌아가기</button>
+            <div class="balance-card">
+                <div class="balance-title">총 보유 자산 (KRW 환산)</div>
+                <div class="balance-amount">₩ 128,450,000</div>
+                <div class="pi-badge">
+                    <span>🪙 Pi 코인 보유량:</span>
+                    <strong>1,250.00 Pi</strong>
+                </div>
+            </div>
+            <div class="card">
+                <div style="font-size: 0.95rem; font-weight: 700; margin-bottom: 6px;">📈 자산 요약 브리핑</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.4;">현재 10대 분산 연동망을 통한 스테이킹 리워드와 기본소득 배분이 안정적으로 반영되고 있습니다.</div>
+            </div>
+        </div>
+
+        <!-- Sub Tab 2: 사고 팔고 예금하기 -->
+        <div id="tab-trading" class="tab-content">
+            <button class="back-btn" onclick="switchTab('home')">← 메인으로 돌아가기</button>
+            <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 12px;">💱 사고 팔고 예금하기 (10대 분산 연동망)</div>
+            <div class="network-grid">
+                <div class="network-item" onclick="alert('지갑이 안전하게 연결되었습니다.')">🔗 지갑 연결</div>
+                <div class="network-item" onclick="alert('송금창 실행')">💸 송금하기</div>
+                <div class="network-item" onclick="alert('실생활 결제 모듈 가동')">💳 결제 연동</div>
+                <div class="network-item" onclick="alert('안전 예치 및 이자 수령')">🔒 예치하기</div>
+                <div class="network-item" onclick="alert('리워드 지급 완료')">🎁 보상 수령</div>
+                <div class="network-item" onclick="alert('기본소득 분배 시스템 활성화')">🏛️ 기본소득</div>
+                <div class="network-item" onclick="alert('스왑 엔진 구동')">🔄 토큰 스왑</div>
+                <div class="network-item" onclick="alert('DEX 유동성 풀 연결')">🌐 DEX 스왑</div>
+                <div class="network-item" onclick="alert('LP 스테이킹 참여')">📊 LP 스테이킹</div>
+                <div class="network-item" onclick="alert('Pi GCV 수량 확인 완료')">🪙 파이 수량</div>
+            </div>
+        </div>
+
+        <!-- Sub Tab 3: 고객센터 삐니 -->
+        <div id="tab-support" class="tab-content">
+            <button class="back-btn" onclick="switchTab('home')">← 메인으로 돌아가기</button>
+            <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 12px;">🤖 고객센터 AGI 삐니</div>
+            <div class="chat-container">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="chat-bubble ai">
+                        안녕하세요, 혜공 형님! 고객센터 삐니입니다. 무엇을 도와드릴까요? 💜 (60개국어 i18n 엔진 장착 완료)
+                    </div>
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" id="chatInput" class="chat-input" placeholder="삐니에게 질문하기..." onkeypress="if(event.key === 'Enter') sendMessage()">
+                    <button class="send-btn" onclick="sendMessage()">전송</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sub Tab 4: 네비게이터 -->
+        <div id="tab-nav" class="tab-content">
+            <button class="back-btn" onclick="switchTab('home')">← 메인으로 돌아가기</button>
+            <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 12px;">🧭 HK 네비게이터 허브</div>
+            <div class="card" onclick="alert('HK WorldBank (hkwb.world)로 이동합니다.')" style="cursor: pointer;">
+                <div style="font-size: 0.95rem; font-weight: 700; color: #a78bfa; margin-bottom: 4px;">🌐 HK WorldBank (60개국어 지원)</div>
+                <div style="font-size: 0.82rem; color: var(--text-muted);">글로벌 웹3 디지털 뱅킹 플랫폼</div>
+            </div>
+            <div class="card" onclick="alert('HK-NEXUS 스마트 글래스(해온·누리온·라온) 허브')" style="cursor: pointer;">
+                <div style="font-size: 0.95rem; font-weight: 700; color: #a78bfa; margin-bottom: 4px;">👓 HK-NEXUS (해온·누리온·라온)</div>
+                <div style="font-size: 0.82rem; color: var(--text-muted);">차세대 AI 스마트 글래스 및 방위·로보틱스 프로젝트</div>
+            </div>
+            <div class="card" onclick="alert('해오름 메가시티(울산·경주·포항) 클러스터 안내')" style="cursor: pointer;">
+                <div style="font-size: 0.95rem; font-weight: 700; color: #a78bfa; margin-bottom: 4px;">🏙️ 해오름 메가시티 프로젝트</div>
+                <div style="font-size: 0.82rem; color: var(--text-muted);">울산·경주·포항 삼각 클러스터 연계</div>
+            </div>
+        </div>
+
+        <!-- Sub Tab 5: 유튜브와 틱톡 -->
+        <div id="tab-media" class="tab-content">
+            <button class="back-btn" onclick="switchTab('home')">← 메인으로 돌아가기</button>
+            <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 12px;">📺 유튜브와 틱톡 미디어</div>
+            <div class="card">
+                <div style="font-size: 0.95rem; font-weight: 700; margin-bottom: 6px;">🔴 유튜브 공식 채널 (@Hyekong2026)</div>
+                <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">경제, 기술, 해오름 메가시티 라이브 방송 스트리밍</div>
+                <button class="btn-primary" onclick="window.open('https://youtube.com', '_blank')">유튜브 채널 바로가기</button>
+            </div>
+            <div class="card" style="margin-top: 14px;">
+                <div style="font-size: 0.95rem; font-weight: 700; margin-bottom: 6px;">🎵 틱톡 채널 (@hyekong2026)</div>
+                <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 12px;">숏폼 하이라이트 및 스마트 글래스 시연 영상</div>
+                <button class="btn-primary" style="background: #ec4899;" onclick="window.open('https://tiktok.com', '_blank')">틱톡 채널 바로가기</button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Fixed Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" onclick="switchTab('home')" id="nav-home">
+            <span class="nav-icon">🏠</span>
+            <span>홈 (메인)</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('trading')" id="nav-trading">
+            <span class="nav-icon">💱</span>
+            <span>거래·예금</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('support')" id="nav-support">
+            <span class="nav-icon">🤖</span>
+            <span>삐니</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('media')" id="nav-media">
+            <span class="nav-icon">📺</span>
+            <span>미디어</span>
+        </button>
+    </nav>
+</div>
+
+<script>
+    function switchTab(tabName) {
+        // Hide all tabs
+        const tabs = document.querySelectorAll('.tab-content');
+        tabs.forEach(tab => tab.classList.remove('active'));
+
+        // Remove active class from nav items
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(item => item.classList.remove('active'));
+
+        // Show target tab
+        if (tabName === 'home') {
+            document.getElementById('tab-home').classList.add('active');
+            document.getElementById('nav-home').classList.add('active');
+        } else if (tabName === 'dashboard') {
+            document.getElementById('tab-dashboard').classList.add('active');
+        } else if (tabName === 'trading') {
+            document.getElementById('tab-trading').classList.add('active');
+            document.getElementById('nav-trading').classList.add('active');
+        } else if (tabName === 'support') {
+            document.getElementById('tab-support').classList.add('active');
+            document.getElementById('nav-support').classList.add('active');
+        } else if (tabName === 'nav') {
+            document.getElementById('tab-nav').classList.add('active');
+        } else if (tabName === 'media') {
+            document.getElementById('tab-media').classList.add('active');
+            document.getElementById('nav-media').classList.add('active');
+        }
+        
+        // Scroll content back to top
+        document.querySelector('.app-content').scrollTop = 0;
+    }
+
+    // AGI 삐니 채팅 기능
+    function sendMessage() {
+        const input = document.getElementById('chatInput');
+        const text = input.value.trim();
+        if (!text) return;
+
+        const messagesContainer = document.getElementById('chatMessages');
+
+        // User bubble
+        const userBubble = document.createElement('div');
+        userBubble.className = 'chat-bubble user';
+        userBubble.textContent = text;
+        messagesContainer.appendChild(userBubble);
+
+        input.value = '';
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        // AGI AI Response simulation
+        setTimeout(() => {
+            const aiBubble = document.createElement('div');
+            aiBubble.className = 'chat-bubble ai';
+            aiBubble.textContent = `형님! "${text}" 요청하신 내용 60개국어 i18n 엔진과 연동하여 완벽하게 처리 완료했습니다. 또 지시하실 말씀 있으신가요? 💜`;
+            messagesContainer.appendChild(aiBubble);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }, 600);
+    }
+</script>
+
+</body>
+</html>
